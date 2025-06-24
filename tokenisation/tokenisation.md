@@ -12,40 +12,49 @@ A byte is consisted of eight bits, which corresponds to $2^8 = 256$ values
 ```
 
 ## Unicode
-$$
-\text{character} \xrightarrow{\text{Unicode}} \text{hex rep}
- $$
+
+`character → hex rep`
+
 Unicode maps a character into a number in hexadecimal, which is called Unicode Code Point 
 
-![Alt text](imgs/unicode-example.png)
+<div align="center">
+<img src="imgs/unicode-example.png" width="600"/>
+</div>
 
 ## UTF-8
-$$
-\text{character} \xrightarrow{\text{Unicode}} \text{hex rep}
- \xrightarrow{\text{UTF-8}} \text{byte rep} 
-$$
+`character → byte rep`
 
 A byte can take 256 different values, so it can also be used as a code. 
 In UTF-8, a character is first mapped into a number in hex by Unicode, then, we map it into the byte representation.
 
-![Alt text](imgs/UTF-8.png)
+<div align="center">
+<img src="imgs/UTF-8.png" width="500"/>
+</div>
 
-![Alt text](imgs/unicode-utf.png)
+ <br>
+  <br>
+
+<div align="center">
+<img src="imgs/unicode-utf.png" width="600"/>
+</div>
+
 
 # Tokenisation
 
 ## character, word, subword
 
-Character level tokenisation treats each character as a token.
+### Character level 
+Treats each character as a token.
 
 Downside
-- The vocabulary size depends on the alphabet of the language.
+- The vocabulary size depends on the language's alphabet.
 - We will usually end up with a very long input
 
 Upside
 - We will never run into out of vocabulary
 
-Word level tokenisation treats each word as a token.
+### Word level 
+Treats each word as a token.
 
 Downside
 - Unbounded vocabulary size
@@ -54,11 +63,11 @@ Upside
 - Short input
 - Each single unit is something sensible
 
-Subword
-Here we usually learn the subword from a given corpora.
+### Subword
+Here we usually learn the subword from a given corpus.
 
 Downside
-- Might learn different representation for the same thing, `cat`, `Cat`, `Cat.`, `cat!` might end up have their own representation
+- Might learn different representations for the same thing, `cat`, `Cat`, `Cat.`, `cat!` might end up have their own representation
 - Might break a word in strange ways
 
 Upside
@@ -85,8 +94,9 @@ for i in range(num_merges):
 
 BPE uses byte as the basic unit, which means at the beginning there are 256 vocabulary
 
-![Alt text](imgs/bpe-example.png)
-
+<div align="center">
+<img src="imgs/bpe-example.png" width="600"/>
+</div>
 
 # Bizarre things caused by tokenisation
 
@@ -99,14 +109,19 @@ https://tiktokenizer.vercel.app/?model=cl100k_base
 Common words are usually represented in a single token. 
 LLM see them as a unit, it can't look inside the word.
 
-![Alt text](imgs/spell.png)
+<div align="center">
+<img src="imgs/spell.png" width="900"/>
+</div>
+
 
 
 - Why is LLM bad at simple arithmetic?
 
 Numebrs are broke into pieces
 
-![Alt text](imgs/sum.png)
+<div align="center">
+<img src="imgs/sum.png" width="900"/>
+</div>
 
 - Why is LLM worse at non-English languages?
 
@@ -114,4 +129,6 @@ Non-English languages are less common in the training data for tokeniser, which 
 This results in a longer sequence for non-English language.
 
 
-![Alt text](imgs/chinese.png)
+<div align="center">
+<img src="imgs/chinese.png" width="900"/>
+</div>
