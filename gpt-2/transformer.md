@@ -1,6 +1,6 @@
 # Component
 ## self-attention
-
+### pipeline
 <div align="center">
 <img src="imgs/self-attention.png" width="700"/>
 </div>
@@ -11,6 +11,21 @@ $$\text{Attn}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf
 
 where
 $$\mathbf{Q} \in \mathbb{R}^{T \times C}, \mathbf{K} \in \mathbb{R}^{T \times C}, \mathbf{V} \in \mathbb{R}^{T \times C}$$
+
+
+In each single head, if using causal masking, each row will only has information up until current time step.
+
+<div align="center">
+<img src="imgs/single-head.png" width="700"/>
+</div>
+
+Then in multi-head fuse, different heads results are concatenated so that tokens from different time step also never communicate together
+
+<div align="center">
+<img src="imgs/multi-head-fuse.png" width="700"/>
+</div>
+
+Then as MLP is applied per token independently, in the end after passing through the whole transformer, emb[t] will only has information from x[1:t].
 
 
 Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score after softmax. 
@@ -24,14 +39,6 @@ We have
 $$\text{Var}[\mathbf{q}\mathbf{k}^{\top}] = \text{Var}\left[\sum_{d=1}^{d_k}q_dk_d\right] = \sum_{d=1}^{d_k}\text{Var}[q_dk_d] = d_k$$
 
 $$\text{Var}\left[\frac{\mathbf{q}\mathbf{k}^{\top}}{\sqrt{d_k}}\right] = 1$$
-
-
-
-Note that
-
-- Attention doesn't have any direction
-
-- In practice attention is implemented over batch. Since the operation is broadcasted over batch, tokens from different batches never communicate
 
 
 ## residual connection
