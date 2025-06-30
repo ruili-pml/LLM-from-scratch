@@ -2,11 +2,13 @@
 ## self-attention
 
 <div align="center">
-<img src="imgs/self-attention.png" width="900"/>
+<img src="imgs/self-attention.png" width="700"/>
 </div>
 
 We can write self-attention as
+
 $$\text{Attn}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf{Q}\mathbf{K}^{\top}}{\sqrt{d_k}}) \mathbf{V}$$
+
 where
 $$\mathbf{Q} \in \mathbb{R}^{T \times C}, \mathbf{K} \in \mathbb{R}^{T \times C}, \mathbf{V} \in \mathbb{R}^{T \times C}$$
 
@@ -15,15 +17,13 @@ Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score
 If we assume each feature dimension of $\mathbf{q}$ and $\mathbf{k}$ is univariate Gaussian.  
 If we make this assumption
 
-> Let $X, Y$ be uncorrelated random variables with means $\mu_X, \mu_Y$, and variances $\sigma_X^2, \sigma_Y^2$. If, additionally, the random variables $X^2$ and $Y^2$ are uncorrelated, then the variance of the product $X Y$ is ${ }^{[4]}$
->$$
-\operatorname{Var}(X Y)=\left(\sigma_X^2+\mu_X^2\right)\left(\sigma_Y^2+\mu_Y^2\right)-\mu_X^2 \mu_Y^2
-$$
+> Let $X, Y$ be uncorrelated random variables with means $\mu_X, \mu_Y$, and variances $\sigma_X^2, \sigma_Y^2$. If, additionally, the random variables $X^2$ and $Y^2$ are uncorrelated, then the variance of the product $XY$ is
+>$$\text{Var}(X Y)=\left(\sigma_X^2+\mu_X^2\right)\left(\sigma_Y^2+\mu_Y^2\right)-\mu_X^2 \mu_Y^2$$
 
 We have 
-$$\mathbb{V}\text{ar}[\mathbf{q}\mathbf{k}^{\top}] = \mathbb{V}\text{ar}\left[\sum_{d=1}^{d_k}q_dk_d\right] = \sum_{d=1}^{d_k}\mathbb{V}\text{ar}[q_dk_d] = d_k$$
+$$\text{Var}[\mathbf{q}\mathbf{k}^{\top}] = \text{Var}\left[\sum_{d=1}^{d_k}q_dk_d\right] = \sum_{d=1}^{d_k}\text{Var}[q_dk_d] = d_k$$
 
-$$\mathbb{V}\text{ar}\left[\frac{\mathbf{q}\mathbf{k}^{\top}}{\sqrt{d_k}}\right] = 1$$
+$$\text{Var}\left[\frac{\mathbf{q}\mathbf{k}^{\top}}{\sqrt{d_k}}\right] = 1$$
 
 
 
@@ -72,7 +72,9 @@ The goal is to encode/understand the input text, uses bidirectional self-attenti
 
 BERT is being trained with Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).
 In MLM, tokens are randomly masked
+
 ```The quick [MASK] fox jumps over the [MASK] dog```
+
 and the network needs to predict these masked tokens.
 
 
