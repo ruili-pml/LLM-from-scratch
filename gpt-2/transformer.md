@@ -1,6 +1,5 @@
 # Component
 ## self-attention
-### pipeline
 <div align="center">
 <img src="imgs/self-attention.png" width="700"/>
 </div>
@@ -19,13 +18,14 @@ In each single head, if using causal masking, `emb[t]` will only have informatio
 <img src="imgs/single-head.png" width="700"/>
 </div>
 
-Then in multi-head fuse, different heads results are concatenated so that tokens from different time step also never communicate together
+In multi-head fuse, different heads results are concatenated so that tokens from different time step also never communicate together
+
 
 <div align="center">
-<img src="imgs/multi-head-fuse.png" width="700"/>
+<img src="imgs/multi-head-fused.png" width="700"/>
 </div>
 
-Then as MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only has information from `x[1:t]`.
+As MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only has information from `x[1:t]`.
 
 
 Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score after softmax. 
