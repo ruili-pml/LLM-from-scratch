@@ -13,7 +13,7 @@ where
 $$\mathbf{Q} \in \mathbb{R}^{T \times C}, \mathbf{K} \in \mathbb{R}^{T \times C}, \mathbf{V} \in \mathbb{R}^{T \times C}$$
 
 
-In each single head, if using causal masking, each row will only has information up until current time step.
+In each single head, if using causal masking, `emb[t]` will only have information from `x[1:t]`.
 
 <div align="center">
 <img src="imgs/single-head.png" width="700"/>
@@ -25,7 +25,7 @@ Then in multi-head fuse, different heads results are concatenated so that tokens
 <img src="imgs/multi-head-fuse.png" width="700"/>
 </div>
 
-Then as MLP is applied per token independently, in the end after passing through the whole transformer, emb[t] will only has information from x[1:t].
+Then as MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only has information from `x[1:t]`.
 
 
 Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score after softmax. 
