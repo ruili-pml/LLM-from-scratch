@@ -68,8 +68,13 @@ The goal is to encode/understand the input text, uses bidirectional self-attenti
 
 ```css
 [Input] ──► [Encoder Stack] ──► [Output embeddings or classification]
-
 ```
+
+BERT is being trained with Masked Language Modeling (MLM) and Next Sentence Prediction (NSP).
+In MLM, tokens are randomly masked
+```The quick [MASK] fox jumps over the [MASK] dog```
+and the network needs to predict these masked tokens.
+
 
 ### Decoder (GPT, Llama, ...)
 The goal is to generate text, uses causal (masked) self-attention
