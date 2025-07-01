@@ -25,7 +25,10 @@ In multi-head fuse, different heads results are concatenated so that tokens from
 <img src="imgs/multi-head-fused.png" width="700"/>
 </div>
 
-As MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only has information from `x[1:t]`.
+As MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only have information from `x[1:t]`.
+
+Because of this, a input sequence with length $T$ corresponds to $T$ prediction tasks in the end.
+
 
 
 Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score after softmax. 
