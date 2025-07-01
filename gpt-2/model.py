@@ -102,10 +102,27 @@ class GPT(nn.Module):
             ln_f = nn.LayerNorm(config.n_embd),   
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias = False)
-    
-    def forward(self, idx):
         
-        # idx is the token idx, of shape [B, T]
+        # weight tying scheme
+        self.transformer.wte.weight = self.lm_head.weight  # about 30% params for 124M model
+
+        # init params
+        self.apply(self._init_weights)
+
+    def _init_weights(self, module):
+        if isinstance(module, nn.Linear):
+            std = 0.02
+            if hasattr(module, 'NANOGPT_SCALE_INIT'):
+                std *= (2 * self.config.n_layer) ** -0.5
+            torch.nn.init.normal_(module.weight, mean=0.0, std=std)
+            if module.bias is not None:
+                torch.nn.init.zeros_(module.bias)
+        elif isinstance(module, nn.Embedding):
+            torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
+    
+    def forward(self, idx, target = None):
+        
+        # idx is the token idx, of shape [B, T]. target is [B ,T] as well
         B, T = idx.size()
         assert T <= self.config.block_size
         
@@ -122,9 +139,15 @@ class GPT(nn.Module):
             x = block(x)
         
         x = self.transformer.ln_f(x)
-        logits = self.lm_head(x)
         
-        return logits
+        logits = self.lm_head(x) # [B, T, vocab_size]
+        
+        loss = None
+        if target is not None:
+            loss = F.cross_entropy(logits.view(-1, logits.size(-1)),
+                                   target.view(-1))
+            
+        return logits, loss
         
     @classmethod
     def from_pretrained(cls, model_type):
