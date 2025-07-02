@@ -67,7 +67,9 @@ x = x + self.mlp(self.ln_2(x))
 For some reason pre-LN allows better gradient flows in very deep stacks.
 
 ## layer normalisation
-TODO
+
+For causal attention we don't want information to flow from future token to the past token, so layer norm is a better choice.
+It basically do the normalisation on each token independently.
 
 # Structure
 
