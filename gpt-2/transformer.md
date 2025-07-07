@@ -106,3 +106,23 @@ The goal is to map one sequence to another (translation, summarization, etc), us
                          │
 [Generated tokens so far] ──► [Decoder] ──► [Next token]
 ```
+
+# Training details
+
+## gradient clipping
+
+Graident is clipped to have a maximum norm to decrease the influence of bad batches.
+
+## learning rate schedule
+
+Warm up + learning rate decay
+
+## weight decay
+
+For some reason, one dimension tensors (like bias, layer norm) are usually not weight decayed.
+
+## gradient accumulation
+
+When we can't fit a huge batch size on to GPU, we can use gradient accumulation to achieve this with multiple smaller batches.
+
+
