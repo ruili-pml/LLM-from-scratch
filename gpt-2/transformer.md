@@ -1,5 +1,7 @@
 # Component
 ## self-attention
+
+### single-head
 <div align="center">
 <img src="imgs/self-attention.png" width="700"/>
 </div>
@@ -11,27 +13,13 @@ $$\text{Attn}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf
 where
 $$\mathbf{Q} \in \mathbb{R}^{T \times C}, \mathbf{K} \in \mathbb{R}^{T \times C}, \mathbf{V} \in \mathbb{R}^{T \times C}$$
 
-
-In each single head, if using causal masking, `emb[t]` will only have information from `x[1:t]`.
-
+In each single head, if using causal masking, `emb[t]` will only have information from `x[1:t]`:
 <div align="center">
 <img src="imgs/single-head.png" width="700"/>
 </div>
 
-In multi-head fuse, different heads results are concatenated so that tokens from different time step also never communicate together
-
-
-<div align="center">
-<img src="imgs/multi-head-fused.png" width="700"/>
-</div>
-
-As MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only have information from `x[1:t]`.
-
-Because of this, a input sequence with length $T$ corresponds to $T$ prediction tasks in the end.
-
-
-
-Divide by $\sqrt{d_k}$ is to make sure we don't get overly sharp attention score after softmax. 
+#### divided by $\sqrt{d_k}$
+This is to make sure we don't get overly sharp attention score after softmax. 
 If we assume each feature dimension of $\mathbf{q}$ and $\mathbf{k}$ is univariate Gaussian.  
 If we make this assumption
 
@@ -42,6 +30,25 @@ We have
 $$\text{Var}[\mathbf{q}\mathbf{k}^{\top}] = \text{Var}\left[\sum_{d=1}^{d_k}q_dk_d\right] = \sum_{d=1}^{d_k}\text{Var}[q_dk_d] = d_k$$
 
 $$\text{Var}\left[\frac{\mathbf{q}\mathbf{k}^{\top}}{\sqrt{d_k}}\right] = 1$$
+
+### multi-head
+
+
+In multi-head attention, $\text{softmax}(\frac{\mathbf{Q}\mathbf{K}^{\top}}{\sqrt{d_k}}) \mathbf{V}$ from different attention heads are concatenated together and then fused. 
+This is done so that tokens from different time steps never communicate with each other:
+
+<div align="center">
+<img src="imgs/multi-head-fused.png" width="700"/>
+</div>
+
+## efficient causal training 
+
+Attention is designed so that futher information never flows into the past.
+As MLP is applied per token independently, in the end after passing through the whole transformer, `emb[t]` will only have information from `x[1:t]`.
+
+Because of this, an input sequence with length $T$ corresponds to $T$ prediction tasks in the end, i.e., if we denote $f(x_{1:T})$ as the output of the transformer, then, $f(x_{1:T})[t]$ will be the prediction for the next token for $x[1:t]$. 
+
+
 
 
 ## residual connection
@@ -108,6 +115,48 @@ The goal is to map one sequence to another (translation, summarization, etc), us
 ```
 
 # Training details
+Simple training loop
+```python
+optimizer = torch.optim.AdamW(model.parameters(), lr = 3e-4, weight_decay = 1e-3)
+for i in range(50):
+    optimizer.zero_grad()
+    
+    logits, loss = model(x, y)
+    loss.backward()    
+    optimizer.step()
+    
+    print(f"step {i}, loss {loss.item()}")
+```
+
+with gradient clipping, learning rate schedule, correct weight decay and gradient accumulation
+
+```python
+optimizer = model.configure_optimizers(weight_decay, lr, device) # only decay 2D parameters
+
+for cur_step in range(max_steps):
+    optimizer.zero_grad()
+    
+    loss_accum = 0.0
+    # gradeint accumulation
+    for micro_step in range(grad_accum_steps):
+        # mixed precision
+        with torch.autocast(device_type = device, dtype = torch.bfloat16):
+            logits, loss = model(x, y)
+        loss = loss / grad_accum_steps  # CE average over the number of batch
+        loss_accum += loss.detach()
+        loss.backward()    
+    # gradient clip
+    norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+    # learning rate schedule
+    lr = get_lr(cur_step)
+    for param_group in optimizer.param_groups:
+        param_group['lr'] = lr
+    optimizer.step()
+    
+    print(f"step {cur_step:4d} | loss {loss_accum.item():.6f} | norm: {norm:.4f}")
+
+```
+
 
 ## gradient clipping
 
@@ -124,5 +173,17 @@ For some reason, one dimension tensors (like bias, layer norm) are usually not w
 ## gradient accumulation
 
 When we can't fit a huge batch size on to GPU, we can use gradient accumulation to achieve this with multiple smaller batches.
+
+Here the idea is, in the loss the default reduction is `mean`, which is calculated over each single batch.
+
+The gradeint for a batch size $M$ is then computed on $\frac{1}{M} \sum_{i=1}^M \ell_i$, where $\ell_i$ is the loss for data point $i$.
+
+If we split this into, say, 3 smaller batches. Then for each batch, the gradient is computed over $\frac{1}{M/3} \sum_{i=1}^{M/3} \ell_i = \frac{3}{M}\sum_{i=1}^{M/3} \ell_i$. 
+In Pytorch the gradient is summed over together, thus, if we call `loss.grad()` four times, the current gradients stored would be
+$$\frac{3}{M}\sum_{i=1}^{M/3} \ell_i + \frac{3}{M}\sum_{i=1}^{M/4} \ell_i + \frac{3}{M}\sum_{i=1}^{M/3} \ell_i = \frac{3}{M}\sum_{i=1}^{M} \ell_i$$
+
+To get the correct gradient, we need to divide this by 3. 
+
+
 
 
