@@ -157,6 +157,9 @@ for cur_step in range(max_steps):
 
 ```
 
+## auto-casting
+
+Some computations in forward pass don't require full precision (fp32). `torch.autocast` will compute the one with lower precision automatically.
 
 ## gradient clipping
 
