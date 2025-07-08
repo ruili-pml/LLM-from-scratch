@@ -53,8 +53,6 @@ Because of this, an input sequence with length $T$ corresponds to $T$ prediction
 
 ## residual connection
 
-TODO
-
 - deep neural network suffers from optimisation, residual connection helps
 - gradient distribution evenly over sum, then residual connection provides a fast flow from target to inputs
 
@@ -71,7 +69,7 @@ x = x + self.attn(self.ln_1(x))
 x = x + self.mlp(self.ln_2(x))
 ```
 
-For some reason pre-LN allows better gradient flows in very deep stacks.
+TODO: pre-LN allows better gradient flows in very deep neural networks for some reason. 
 
 ## layer normalisation
 
