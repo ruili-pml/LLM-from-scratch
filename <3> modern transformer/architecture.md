@@ -118,30 +118,30 @@ The math and code looks like this
 </div>
 
 
-# Degisn choice / Hyperparameters
+# Design choice / Hyperparameters
 
 ## How much bigger should the MLP expansion be?
 
 $d_{\text{fc}} =4 d_{\text{hidden}}$ is usually the case. 
 
 <div align="center">
-<img src="imgs/fc-dim.png" width="300"/>
+<img src="imgs/fc-dim.png" width="400"/>
 </div>
 
-## Does hidden dim / num heads must be an integral?
+## Does hidden dim / num heads must be an integer?
 Model dim refers to the embedding dimension. 
 
 Ratio is (num head * head dim) / embedding dimension 
 
 <div align="center">
-<img src="imgs/multi-head-dim.png" width="300"/>
+<img src="imgs/multi-head-dim.png" width="500"/>
 </div>
 
 ## What should be the vocab size?
 Monolingual vocab doesn't need to be huge, but multilingual ones do.
 
 <div align="center">
-<img src="imgs/vocab-size.png" width="300"/>
+<img src="imgs/vocab-size.png" width="700"/>
 </div>
 
 ## Do we need regularization during pretraining?
@@ -154,7 +154,7 @@ Pre-training usually only do one epoch because of the huge size of training data
 But in practice, 
 
 <div align="center">
-<img src="imgs/regularisation.png" width="300"/>
+<img src="imgs/regularisation.png" width="400"/>
 </div>
 
 It turns out that weight decay is somehow intertangled with the learning rate scheduler. 
