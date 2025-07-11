@@ -73,7 +73,9 @@ $$
 
 where $\text{Swish}_\beta(x)=x \sigma(\beta x)$. 
 
-We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, and $\textcolor{blue}{V}$ as the extra parameter from the activation function
+We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, and $\textcolor{blue}{V}$ as the extra parameter from the activation function.
+
+All GLU variants are scaled by $\frac23$ to preserve the variance across layers.
 
 ## serial vs parallel layers
 
@@ -114,3 +116,45 @@ The math and code looks like this
 <div align="center">
 <img src="imgs/rope-code.png" width="500"/>
 </div>
+
+# Degisn choice / Hyperparameters
+
+## How much bigger should the MLP expansion be?
+
+$d_{\text{fc}} =4 d_{\text{hidden}}$ is usually the case. 
+
+<div align="center">
+<img src="imgs/fc-dim.png" width="300"/>
+</div>
+
+## Does hidden dim / num heads must be an integral?
+Model dim refers to the embedding dimension. 
+
+Ratio is (num head * head dim) / embedding dimension 
+
+<div align="center">
+<img src="imgs/multi-head-dim.png" width="300"/>
+</div>
+
+## What should be the vocab size?
+Monolingual vocab doesn't need to be huge, but multilingual ones do.
+
+<div align="center">
+<img src="imgs/vocab-size.png" width="300"/>
+</div>
+
+## Do we need regularization during pretraining?
+
+Pre-training usually only do one epoch because of the huge size of training data.
+
+- There is a lot of data (trillions of tokens), more than parameters.
+- SGD only does a single pass on a corpus (hard to memorize)
+
+But in practice, 
+
+<div align="center">
+<img src="imgs/regularisation.png" width="300"/>
+</div>
+
+It turns out that weight decay is somehow intertangled with the learning rate scheduler. 
+So it's not about regularisation, but about optimisation.
