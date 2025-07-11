@@ -110,12 +110,13 @@ Becuase rotation in higher dimension than 2D is not determinstic, it does a funk
 
 The math and code looks like this
 <div align="center">
-<img src="imgs/rope.png" width="400"/>
+<img src="imgs/rope.png" width="700"/>
 </div>
 
 <div align="center">
-<img src="imgs/rope-code.png" width="500"/>
+<img src="imgs/rope-code.png" width="900"/>
 </div>
+
 
 # Degisn choice / Hyperparameters
 
