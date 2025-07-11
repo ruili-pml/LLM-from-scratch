@@ -90,6 +90,27 @@ y=x+\text{MLP}(\text{LN}(x))+\text{Attention}(\text{LN}(x))
 $$
 
 
-## Position embedding
+## Position embedding RoPE
 
-RoPE
+### once vs all time
+In vanilla position embedding, it adds a vector at the beginning of the NN once and for all. 
+
+If we look at the computation in transformer, the position only matters in the attention score computation.
+So RoPE encode position into query and key vector.
+
+### relative position
+
+Another thing RoPE did is encode the relative position. 
+Since attention score uses inner product, the position embedidng needs to be encode in a way that only relative position will matter.
+Here it uses rotation.
+
+Becuase rotation in higher dimension than 2D is not determinstic, it does a funky thing to split query vector in a bunch of 2D pairs, and then rotate them each.
+
+The math and code looks like this
+<div align="center">
+<img src="imgs/rope.png" width="400"/>
+</div>
+
+<div align="center">
+<img src="imgs/rope-code.png" width="500"/>
+</div>
