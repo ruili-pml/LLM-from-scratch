@@ -18,7 +18,7 @@ Nowadays pre-norm is the most common choice. It is more stable to train.
 
 ## LayerNorm vs RMSNorm
 
-LayerNorm: $y=\frac{x-\mathrm{E}[x]}{\sqrt{\operatorname{Var}[x]+\epsilon}} * \gamma+\beta$
+LayerNorm: $y=\frac{x-\mathrm{E}[x]}{\sqrt{\text{Var}[x]+\epsilon}} * \gamma+\beta$
 
 RMSNorm: $y=\frac{x}{\sqrt{||x||_2^2+\epsilon}} * \gamma$
 
@@ -67,7 +67,7 @@ $$
 $$
 \text{SwiGLU}(x, \textcolor{green}{W}, \textcolor{blue}{V}) = \text{Swish}_1(x\textcolor{green}{W}) \odot (x\textcolor{blue}{V})
 $$
-where $\operatorname{Swish}_\beta(x)=x \sigma(\beta x)$. 
+where $\text{Swish}_\beta(x)=x \sigma(\beta x)$. 
 
 We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, and $\textcolor{blue}{V}$ as the extra parameter from the activation function
 
@@ -75,12 +75,12 @@ We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, 
 
 Normally transformer blocks are serial:
 $$
-y=x+\operatorname{MLP}(\operatorname{LN}(x+\operatorname{Attention}(\operatorname{LN}(x)))
+y=x+\text{MLP}(\text{LN}(x+\text{Attention}(\text{LN}(x)))
 $$
 
 Parallel layers do this in parallel:
 $$
-y=x+\operatorname{MLP}(\operatorname{LN}(x))+\operatorname{Attention}(\operatorname{LN}(x))
+y=x+\text{MLP}(\text{LN}(x))+\text{Attention}(\text{LN}(x))
 $$
 
 
