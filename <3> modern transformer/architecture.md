@@ -52,10 +52,13 @@ x = fc2(x)
 ```
 
 GLU and its variants changes `x = activation(fc1(x))`
+
 $$
 \text{activation(fc1(}x\text{))} = \text{activation}(x\textcolor{green}{W})
 $$
+
 into
+
 $$
 \text{GLU}(x, \textcolor{green}{W}, \textcolor{blue}{V}) = \sigma(x\textcolor{green}{W}) \odot (x\textcolor{blue}{V})
 $$
@@ -67,6 +70,7 @@ $$
 $$
 \text{SwiGLU}(x, \textcolor{green}{W}, \textcolor{blue}{V}) = \text{Swish}_1(x\textcolor{green}{W}) \odot (x\textcolor{blue}{V})
 $$
+
 where $\text{Swish}_\beta(x)=x \sigma(\beta x)$. 
 
 We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, and $\textcolor{blue}{V}$ as the extra parameter from the activation function
@@ -74,11 +78,13 @@ We can consider $\textcolor{green}{W}$ as the weights for the org linear layer, 
 ## serial vs parallel layers
 
 Normally transformer blocks are serial:
+
 $$
 y=x+\text{MLP}(\text{LN}(x+\text{Attention}(\text{LN}(x)))
 $$
 
 Parallel layers do this in parallel:
+
 $$
 y=x+\text{MLP}(\text{LN}(x))+\text{Attention}(\text{LN}(x))
 $$
