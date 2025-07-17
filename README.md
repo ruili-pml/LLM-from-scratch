@@ -3,19 +3,47 @@
 ## Table of Contents
 
 ### <1> tokenisation
+#### notes
+`tokenisation.md`
 - Unicode, UTF-8
 - Byte-pair Encoding 
 - Problems caused by tokenisation
 
-### <2> vanilla transformer
-transformer.md
+#### implementation
+`tokeniser.ipynb`
+- Unicode, UTF-8
+- BPE implementation
+
+### <2> vanilla transformer (GPT-2)
+#### notes
+`transformer.md`
 - self-attention
 - multi-head attention
 - common transformer structure
 - training details (gradient clipping, learning rate schedule, gradeint accumulation)
 
-computation.md
+`computation.md`
 - mixed precision
+
+#### implementation
+`transformer.ipynb`
+- spelled out attention implementation
+
+`model.py`
+- GPT-2 implementation
+  
+`generate_sentence.py`
+- top-k sampling for generation
+
+`tiny_train_script.py`
+- single epoch training with all the tricks
+
+### <3> modern transformer (Llama)
+
+#### notes
+`architecture.md`
+- common change in architecture 
+
 
 ## references
 
