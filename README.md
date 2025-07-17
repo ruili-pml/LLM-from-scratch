@@ -16,7 +16,7 @@
 
 ### <2> vanilla transformer (GPT-2)
 #### notes
-`transformer.md`
+`vanilla-transformer.md`
 - self-attention
 - multi-head attention
 - common transformer structure
@@ -26,7 +26,8 @@
 - mixed precision
 
 #### implementation
-`transformer.ipynb`
+`vanilla-transformer.ipynb`
+- next token prediction
 - spelled out attention implementation
 
 `model.py`
