@@ -120,16 +120,36 @@ Therefore, we can make prediction efficiently by drop redundant and unnecessary 
 \end{figure}
 
 
-Basically we have
+\subsection{Multi-Query Attention}
+In KV-cache, at time step $t$, the past $t-1$ keys and values are cached, which corresponds to $2 * n_h * (t-1) * h_s$ memory. 
+When $t$ gets larger, storing them all on a single GPU will be impossible and the loading will slow things down.
 
-Token 1: [K1, V1] $\rightarrow$ Cache: [K1, V1]
+The idea of multi-query attention (MQA) is quite simple. 
+In MHA, different heads have different query, key and value projection matrix.
+In MQA, the key and value projection matrics will be shared across all heads, only query project matrix will be different:
+\[
+\begin{array}{ll}
+   \text{MHA} & \qquad \text{MQA} \\
+  \bQ^{(h)} = \bW_Q^{(h)} \bX & \qquad  \bQ^{(h)} = \bW_Q^{(h)} \bX \\
+  \bK^{(h)} = \bW_K^{(h)} \bX & \qquad  \bK^{(h)} = \bW_K \bX \quad \text{(shared across heads)} \\
+  \bV^{(h)} = \bW_V^{(h)} \bX & \qquad  \bV^{(h)} = \bW_V \bX \quad \text{(shared across heads)}
+\end{array}
+\]
 
-Token 2: [K2, V2] $\rightarrow$ Cache: [K1, K2], [V1, V2]
+This way, we only need to store one set of KV-cache and share it across all heads.
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.43]{imgs/MQA.png}
+\end{figure}
 
-...
+\subsection{Grouped-Query Attention}
+Sharing the key and value projection across all attention heads might be too brutal, in grouped-query attention, $\bW_K$ and $\bW_V$ are shared in grouped heads.
+So basically different groups have different $\bK$ and $\bV$.
 
-Token n: [Kn, Vn] $\rightarrow$ Cache: [K1, K2, ..., Kn], [V1, V2, ..., Vn]
-
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.45]{imgs/GQA.png}
+\end{figure}
 
 \clearpage
 \section{Positional Embedding}
