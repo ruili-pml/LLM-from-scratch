@@ -154,6 +154,54 @@ So basically different groups have different $\bK$ and $\bV$.
 \clearpage
 \section{Positional Embedding}
 
+\subsection{RoPE}
+
+
+\paragraph{Once and for all vs add all the time}
+In vanilla position embedding, it adds a vector at the beginning of the NN once and for all.
+The positional encoding might get lost in deep networks.
+If we look at the computation in transformer, the position only matters in the attention score computation.
+So RoPE encode position into query and key vector in every attention layer instead.
+
+\paragraph{Absolute position vs relative position}
+
+Another thing RoPE did is encode the \textit{relative} position. 
+The idea is, for a given word when computing its attention score, only the relative position between this word and other word should matter.
+Specifically, if we add the position into the computation of query and key computation:
+\[
+\boldsymbol{q}_m \triangleq f_q(\boldsymbol{x}_m, m), \qquad  \boldsymbol{k}_n \triangleq f_k(\boldsymbol{x}_n, n)
+\]
+
+Then the attention score (which is an inner product) should only depends on the word embeddings $\boldsymbol{x}_m$, $\boldsymbol{x}_n$ and their relative position $m-n$:
+\[
+\boldsymbol{q}_m^{T} \boldsymbol{k}_n = \langle f_q(\boldsymbol{x}_m, m), f_k(\boldsymbol{x}_n, n) \rangle = g(\boldsymbol{x}_m, \boldsymbol{x}_n, m-n)
+\]
+
+One simple choice for $f_{\{q, k\}}(\boldsymbol{x}_m, m)$ is rotate them:
+\[
+f_{\{q, k\}}(\boldsymbol{x}_m, m) = \boldsymbol{R}(m) \boldsymbol{W}_{\{q, k\}} \boldsymbol{x}_m
+\]
+where $\boldsymbol{R}(m)$ is a rotation matrix whose angle depends on $m$.
+
+Define $\widetilde{\boldsymbol{q}}_m =\boldsymbol{W}_q \boldsymbol{x}_m$ and $\widetilde{\boldsymbol{k}}_m =\boldsymbol{W}_k \boldsymbol{x}_m$, now we have
+\[
+(\boldsymbol{R}(m) \boldsymbol{W}_q \boldsymbol{x}_m)^{T} (\boldsymbol{R}(n) \boldsymbol{W}_k \boldsymbol{x}_n) = \widetilde{\boldsymbol{q}}_m^T \textcolor{mygreen}{\boldsymbol{R}(m)^T \boldsymbol{R}(n)} \widetilde{\boldsymbol{k}}_n = \widetilde{\boldsymbol{q}}_m^T \textcolor{mygreen}{\boldsymbol{R}(n-m)} \widetilde{\boldsymbol{k}}_n 
+\]
+
+Because rotation in higher dimension than 2D is not deterministic, it does a funky thing to split query vector in a bunch of 2D pairs, and then rotate them each.
+
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.4]{imgs/rope.png}
+\end{figure}
+
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[scale=0.4]{imgs/rope-code.png}
+\end{figure}
+
 % print bibliography
 \clearpage
 \bibliography{bibliography} 
