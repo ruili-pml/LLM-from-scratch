@@ -155,6 +155,8 @@ where
 where $\text{Swish}_\beta(\bx)=\bx \sigma(\beta \bx)$, \ie, $\text{Swish}_1(\bx)=\bx \sigma(\bx)$. Sigmoid is applied element-wise on the matrix.
 
 
+Here since the gating part is element-wise, it allows the MLP to filter out unimportant features for each input. To make sure the computation cost is still more or less the same as vanilla MLP, the hidden dimension is usually sized down a bit.
+
 Code wise, SwiGLU looks like this
 \begin{figure}[h]
 \centering
