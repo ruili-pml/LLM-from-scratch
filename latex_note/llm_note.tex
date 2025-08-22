@@ -65,7 +65,7 @@
 \clearpage
 
 
-\section{Basic}
+\section{Common component}
 \subsection{Self Attention}
 Given input $\bX \in \reals^{T \times D}$ where $T$ is the sequence length and $D$ is the embedding dimension, we have
 \[
@@ -120,9 +120,51 @@ Then, the output from each head is concatenated together and fused by a linear p
 \includegraphics[scale=0.4]{imgs/multi-head.png}
 \end{figure}
 
+\clearpage
+
+\subsection{Activation Functions}
+
+\paragraph{ReLU} $f(x) = \text{max}(0, x)$
+
+\paragraph{GeLU} $f(x) = x \Phi(x)$, $\Phi(x)$ is the CDF of Gaussian
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.15]{imgs/relu-gelu.png}
+\end{figure}
+
+\paragraph{GLU (gated activations)}
+
+Vanilla MLP in transformer has the path
+\[
+&\bx = \text{fc1}(\bx; \bW_1) \\
+&\bx = \text{activation}(\bx) \tag{simple non-linear function, no parameter}\\
+&\bx = \text{fc2}(\bx; \bW_2)
+\]
+GLU and its variants combine the first fully connected layer and the activation function together:
+\[
+&\bx = \text{activation}(\bx; \bW, \bV) \\
+&\bx = \text{fc2}(\bx; \bW_2) 
+\]
+where
+\[
+&\text{GLU}(\bx, \textcolor{mygreen}{\bW}, \textcolor{myblue}{\bV}) = \sigma(x\textcolor{mygreen}{\bW}) \odot (\bx\textcolor{myblue}{\bV}) \\
+&\text{GeGLU}(\bx, \textcolor{mygreen}{\bW}, \textcolor{myblue}{\bV}) = \text{GELU}(\bx\textcolor{mygreen}{\bW}) \odot (\bx\textcolor{myblue}{\bV}) \\
+&\text{SwiGLU}(\bx, \textcolor{mygreen}{\bW}, \textcolor{myblue}{\bV}) = \text{Swish}_1(\bx\textcolor{mygreen}{\bW}) \odot (\bx\textcolor{myblue}{\bV})
+\]
+where $\text{Swish}_\beta(\bx)=\bx \sigma(\beta \bx)$, \ie, $\text{Swish}_1(\bx)=\bx \sigma(\bx)$. Sigmoid is applied element-wise on the matrix.
+
+
+Code wise, SwiGLU looks like this
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.3]{imgs/swiglu.png}
+\caption{SwiGLU}
+\end{figure}
 
 \clearpage
-\section{Inference}
+
+\section{Inference Specific}
 \subsection{KV-Cache}
 Causal masking is used during training to prevent the model from looking into future tokens to cheat.
 During inference, technically we don't really need to mask things as there is no way for the model to cheat.
