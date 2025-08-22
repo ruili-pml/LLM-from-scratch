@@ -65,11 +65,11 @@
 \clearpage
 
 
-\section{Attention}
+\section{Basic}
 \subsection{Self Attention}
 Given input $\bX \in \reals^{T \times D}$ where $T$ is the sequence length and $D$ is the embedding dimension, we have
 \[
-\bQ = \bW_Q \bX \in \reals^{T \times d_k} \quad \bK= \bW_K \bX \in \reals^{T \times d_k} \quad \bV = \bW_V \bX \in \reals^{T \times d_v}
+\bQ = \bX \bW_Q \in \reals^{T \times d_k} \quad \bK= \bX \bW_K  \in \reals^{T \times d_k} \quad \bV = \bX \bW_V \in \reals^{T \times d_v}
 \]
 \[
 \text{Attn}(\bQ, \bK, \bV) = \text{softmax} \left(\frac{\bQ \bK^\top}{\sqrt{d_k}} \right) \bV
@@ -79,33 +79,63 @@ Given input $\bX \in \reals^{T \times D}$ where $T$ is the sequence length and $
 \centering
 \includegraphics[scale=0.35]{imgs/self-attention.png}
 \end{figure}
+\clearpage
+
+\subsection{Causal Masking \& Unsupervised Pretraining}
+
+Given an input with size $[B, T, D]$, for each $[T, D]$, it is a sentence itself, like ``this is some random stuff" shown below.
+To do efficient training, now for each token in the sentence, the transformer needs to predict its next token.
+This is done by using causal masking:
+
+\begin{center}
+	for $t$-th token, it is only allowed to look at $\bx_{1:t}$.
+\end{center}
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[scale=0.35]{imgs/causal-masking.png}
+\end{figure}
+
+In the end, for each data in the batch, it will have $T$ prediction assuming there's no padding. 
+So in the end, we average $B \times T$ cross entropy loss.
 
 \clearpage
+
 \subsection{Multi-Head Attention}
 In multi-head attention, input $\bX$ is first passed through $H$ self-attention layer in parallel.
 Then, the output from each head is concatenated together and fused by a linear projection
-\[
-\left[\textcolor{myblue}{\bZ^{(1)}}, \bZ^{(2)}, \ldots,  \bZ^{(H)}\right] \bW^O &= 
-\begin{bmatrix}
-\textcolor{myblue}{\bz_1^{(1)}} &  \bz_1^{(2)} & \ldots & \bz_1^{(H)} \\[0.8em]
-\textcolor{myblue}{\bz_2^{(1)}} & \bz_2^{(2)} & \ldots & \bz_2^{(H)} \\[0.8em]
-\vdots & \vdots & \ldots & \vdots \\[0.8em]
-\textcolor{myblue}{\bz_T^{(1)}} & \bz_T^{(2)} & \ldots & \bz_T^{(H)}
-\end{bmatrix}\bW^O
-\] 
+%\[
+%\left[\textcolor{black}{\bZ^{(1)}}, \bZ^{(2)}, \ldots,  \bZ^{(H)}\right] \bW^O &= 
+%\begin{bmatrix}
+%\textcolor{black}{\bz_1^{(1)}} &  \bz_1^{(2)} & \ldots & \bz_1^{(H)} \\[0.8em]
+%\textcolor{black}{\bz_2^{(1)}} & \bz_2^{(2)} & \ldots & \bz_2^{(H)} \\[0.8em]
+%\vdots & \vdots & \ldots & \vdots \\[0.8em]
+%\textcolor{black}{\bz_T^{(1)}} & \bz_T^{(2)} & \ldots & \bz_T^{(H)}
+%\end{bmatrix}\bW^O
+%\] 
 
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.4]{imgs/multi-head.png}
 \end{figure}
 
+
 \clearpage
+\section{Inference}
 \subsection{KV-Cache}
-During inference we still use causal masking because this is how the model being trained.
-Let's look at a simple case where we only give the model a start token <s> and asks it to generate stuff:
+Causal masking is used during training to prevent the model from looking into future tokens to cheat.
+During inference, technically we don't really need to mask things as there is no way for the model to cheat.
+But the causal mask is still kept to preserve the same computation pattern as training.
+
+
+Apart from allowing us to use the model as it is, causal masking during inference also allows us to reuse things. 
+Let's look at the pipeline of generating:
+
 \begin{figure}[!h]
 \centering
-\includegraphics[scale=0.28]{imgs/no-cache.png}
+\includegraphics[scale=0.25]{imgs/kv-cache.png}
+\caption{Left: no cache. Right: KV cache. Coloured parts are the actual computation.}
 \end{figure}
 
 KV-cache is built on this two observations:
@@ -113,12 +143,13 @@ KV-cache is built on this two observations:
 	\item At each time step $t$, due to causal masking $\bk_{<t}$ and $\bv_{<t}$ will remain the same
 	\item To predict <$\text{token}_{t+1}$> we only need embedding of <$\text{token}_{t}$>.
 \end{itemize}
-Therefore, we can make prediction efficiently by drop redundant and unnecessary computation
-\begin{figure}[!h]
-\centering
-\includegraphics[scale=0.28]{imgs/cache.png}
-\end{figure}
+Therefore, we can make prediction efficiently by drop redundant and unnecessary computation. At each time step $t$, we will only compute
+\[
+\bq_t, \bk_t, \bv_t
+\]
+instead of $\bq_{1:t}, \bk_{1:t}, \bv_{1:t}$.
 
+\clearpage
 
 \subsection{Multi-Query Attention}
 In KV-cache, at time step $t$, the past $t-1$ keys and values are cached, which corresponds to $2 * n_h * (t-1) * h_s$ memory. 
@@ -151,7 +182,9 @@ So basically different groups have different $\bK$ and $\bV$.
 	\includegraphics[scale=0.45]{imgs/GQA.png}
 \end{figure}
 
+
 \clearpage
+
 \section{Positional Embedding}
 
 \subsection{RoPE}
